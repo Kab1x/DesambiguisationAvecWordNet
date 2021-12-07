@@ -230,7 +230,6 @@ public class Main {
         rita.wordnet.jwnl.wndata.IndexWord firstIW, secondIW, middleIW;
         int firstI = 0, secondI = 0, middleI = 0, smallestFirst = 0, smallestSecond = 0;
 
-        System.out.println("Init Translation: ");
 
         for (Synset middleWordSynset : middleSynsets) {
             middleIW = new rita.wordnet.jwnl.wndata.IndexWord(currentIW.getLemma(), rita.wordnet.jwnl.wndata.POS.NOUN, new long[]{middleWordSynset.getOffset()});
@@ -297,10 +296,6 @@ public class Main {
             return null;
         }
 
-        System.out.println("Before  Label : " + beforeLabel);
-        System.out.println("Current Label: " + currentLabel);
-        System.out.println("After   Label: " + afterLabel);
-        System.out.println("Last Synset " + lastTranslationSynset);
 
         RiWordNet riwordnet;
         try {
@@ -336,7 +331,6 @@ public class Main {
         rita.wordnet.jwnl.wndata.IndexWord firstIW, secondIW, middleIW;
         int firstI = lastTranslationSynset.id, secondI = 0, middleI = 0, smallestFirst = 0, smallestSecond = 0;
 
-        System.out.println("Translation Par Fenetre: ");
 
         for (Synset middleWordSynset : middleSynsets) {
             middleIW = new rita.wordnet.jwnl.wndata.IndexWord(middleIndexWord.getLemma(), rita.wordnet.jwnl.wndata.POS.NOUN, new long[]{middleWordSynset.getOffset()});
