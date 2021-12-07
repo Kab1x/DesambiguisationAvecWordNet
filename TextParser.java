@@ -24,7 +24,7 @@ import java.util.Properties;
 
 public class TextParser {
 
-    static String pathToText = "/home/kabix/Desktop/FromLinux/PFE/Disambiguation/Dependencies/semcor/brown1/tagfiles/testPhrase.xml";
+    static String pathToText = "/home/kabix/Desktop/FromLinux/PFE/Disambiguation/Dependencies/semcor/brown1/tagfiles/br-c04.xml";
 
     public static String getFullText(int textId) throws ParserConfigurationException, IOException, SAXException {
         DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
@@ -70,45 +70,6 @@ public class TextParser {
         pipeline.annotate(doc);
     }
 
-//      OBSOLETE TROP LENTE
-
-//    public static XMLToken getSemcoreSynset(int index) throws ParserConfigurationException, IOException, SAXException {
-//
-//        XMLToken currentToken = new XMLToken("NULL", -1);
-//
-//        DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-//        DocumentBuilder builder = factory.newDocumentBuilder();
-//        Document xmlDoc = builder.parse(pathToText);
-//
-//        NodeList paragraphs = xmlDoc.getElementsByTagName("p");
-//
-//
-//        int fullTokenIndex = 0;
-//
-//        for(int i = 0; i < paragraphs.getLength(); i++){
-//            Element paragraph = (Element)paragraphs.item(i);
-//            NodeList sList = paragraph.getElementsByTagName("s");
-//
-//            for(int s = 0; s < sList.getLength(); s++){
-//                Element ss = (Element)sList.item(s);
-//                NodeList xmlElements = ss.getElementsByTagName("*");
-//
-//                for(int j = 0; j < xmlElements.getLength(); j++){
-//                    Element xmlElement = (Element) xmlElements.item(j);
-//                    text = " " + xmlElement.getTextContent().strip() + " ";
-//                    initApplication();
-//                    for(int nlpIndex = 0; nlpIndex < doc.tokens().size(); nlpIndex++){
-//                        if(index == fullTokenIndex){
-//                             return new XMLToken(doc.tokens().get(nlpIndex).word(),fullTokenIndex+1);
-//                        }
-//                        fullTokenIndex++;
-//                    }
-//                }
-//            }
-//        }
-//        return currentToken;
-//    }
-
     public static LinkedList<XMLToken> tokens = null;
 
     public static LinkedList<XMLToken> getSemCore() throws ParserConfigurationException, IOException, SAXException {
@@ -120,7 +81,6 @@ public class TextParser {
         }else{
             tokens = new LinkedList<>();
         }
-        XMLToken currentToken = new XMLToken("NULL", -1, -10);
 
         DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
         DocumentBuilder builder = factory.newDocumentBuilder();
@@ -142,12 +102,12 @@ public class TextParser {
                     Element xmlElement = (Element) xmlElements.item(j);
                     text = " " + xmlElement.getTextContent().trim() + " ";
                     initApplication();
-                    int wnSynsetIndex = -1;
+                    int wnSynsetIndex = 0;
                     if(xmlElement.hasAttribute("wnsn")){
                         try{
                             wnSynsetIndex = Integer.parseInt(xmlElement.getAttribute("wnsn").trim().split(";")[0]);
                         }catch (Exception e){
-                            wnSynsetIndex = -2;
+                            wnSynsetIndex = 0;
                         }
                     }
                     for(int nlpIndex = 0; nlpIndex < doc.tokens().size(); nlpIndex++){
@@ -167,28 +127,14 @@ class XMLToken{
         this.tokenIndex = index;
         wnSynsetIndex = _wnSynsetIndex;
     }
+
+    public String toString(){
+        return String.format("%20s Synset id: %d", word, wnSynsetIndex);
+    }
+
     public XMLToken(){};
     String word;
     int    wnSynsetIndex;
     int tokenIndex;
 }
 
-
-
-
-
-/*
-
-
-
-for(int j = 0; j < tokens.getLength(); j++){
-                Element token = (Element)(tokens.item(j));
-
-                if(!tokens.item(j).hasAttributes()){
-                    fullText.append(token.getTextContent().strip().trim()).append(" ");
-                }else{
-                    fullText.append(" ");
-                    fullText.append(token.getTextContent().trim().strip());
-                }
-            }
-* */
