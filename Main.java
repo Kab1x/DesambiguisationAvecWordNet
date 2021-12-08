@@ -80,7 +80,7 @@ public class Main {
 
         System.out.println("\n\n\n");
         System.out.println("les mot ambigues sont :");
-        for (int i = 0; i < doc.tokens().size(); i++) { //Afficher la liste des mots embigues
+        for (int i = 0; i < lastWordIndex; i++) { //Afficher la liste des mots embigues
             CoreLabel cl = doc.tokens().get(i);
             if (cl.tag().contains("NN")) {
                 IndexWord word = dico.lookupIndexWord(POS.NOUN, cl.lemma());
@@ -133,7 +133,7 @@ public class Main {
         System.out.println("Résultats generales: ");
 
         int tempIndex = 0;
-        for (int i = 0; i < doc.tokens().size(); i++) {
+        for (int i = 0; i < lastWordIndex; i++) {
             CoreLabel cl = doc.tokens().get(i);
             if (cl.tag().contains("NN")) {
                 IndexWord word = dico.lookupIndexWord(POS.NOUN, cl.lemma());
@@ -146,7 +146,7 @@ public class Main {
             }
         }
         tempIndex = 0;
-        for (int i = 0; i < doc.tokens().size(); i++) {
+        for (int i = 0; i < lastWordIndex; i++) {
             CoreLabel cl = doc.tokens().get(i);
             if (cl.tag().contains("NN")) {
                 IndexWord word = dico.lookupIndexWord(POS.NOUN, cl.lemma());
@@ -159,7 +159,7 @@ public class Main {
             }
         }
         tempIndex = 0;
-        for (int i = 0; i < doc.tokens().size(); i++) {
+        for (int i = 0; i < lastWordIndex; i++) {
             CoreLabel cl = doc.tokens().get(i);
             if (cl.tag().contains("NN")) {
                 IndexWord word = dico.lookupIndexWord(POS.NOUN, cl.lemma());
@@ -316,6 +316,7 @@ public class Main {
         IndexWord secondIndexWord = dico.lookupIndexWord(POS.NOUN, afterLabel.lemma());
 
         if(firstIndexWord.getSenseCount() == 1){
+            lastTranslationSynset = new SynsetId();
             lastTranslationSynset.synset = firstIndexWord.getSenses()[0];
             lastTranslationSynset.id     = 1;
             lastTranslationSynset.lastLemma = firstIndexWord.getLemma();
@@ -360,7 +361,7 @@ public class Main {
 
         lastTranslationSynset = resultat;
 
-        System.out.format(" La petite distance est : la DISTANCE(%15s Synset %d, %15s Synset %d) + DISTANCE(%15s Synset %d, %15s %d) = %f\n", afterLabel.lemma(), smallestSecond, currentLabel.lemma(), resultat.id, beforeLabel.word(), smallestFirst, currentLabel.lemma(), resultat.id, smallestDistance);
+        System.out.format(" La petite distance est : la DISTANCE(%15s Synset %d, %15s Synset %d) + DISTANCE(%15s Synset %d, %15s %d) = %f\n", afterLabel.word(), smallestSecond, currentLabel.word(), resultat.id, beforeLabel.word(), smallestFirst, currentLabel.word(), resultat.id, smallestDistance);
 
 
         System.out.println("\n\t\t\tle synset retenue par agorithm de Translation Par Fenetre est : " + resultat.id);
@@ -395,9 +396,9 @@ public class Main {
             resultat.id = 1;
             resultat.synset = avantIndexWord.getSenses()[0];
             resultat.lastLemma = avantIndexWord.getLemma();
+            resultat.word = avantLabel.word();
             return resultat;
         }
-
 
         Synset[] middleSynsets = middleIndexWord.getSenses();
         Synset[] avantSynsets = avantIndexWord.getSenses();
@@ -410,12 +411,13 @@ public class Main {
             for (int j = 0; j < avantSynsets.length; j++) {
                 rita.wordnet.jwnl.wndata.IndexWord avantIW = new rita.wordnet.jwnl.wndata.IndexWord(avantIndexWord.getLemma(), rita.wordnet.jwnl.wndata.POS.NOUN, new long[]{avantSynsets[j].getOffset()});
                 distance = riwordnet.getWordDistance(middleIW, avantIW);
-                System.out.format("  DISTANCE(%15s Synset %d , %15s Synset %d) = %f\n", middleIndexWord.getLemma(), i + 1, avantIW.getLemma(), j + 1, distance);
+                System.out.format("  DISTANCE(%15s Synset %d , %15s Synset %d) = %f\n", middleLabel.word(), i + 1, avantLabel.word(), j + 1, distance);
                 if (distance < smallestDistance) {
                     resultat.id = j + 1;
                     smallestDistance = distance;
                     resultat.synset = avantSynsets[j];
                     resultat.lastLemma = avantIndexWord.getLemma();
+                    resultat.word = avantLabel.word();
                 }
             }
         }
@@ -443,7 +445,6 @@ public class Main {
 
 
         if (lastLeftRightSynset == null) {//dernier synset trouvé
-            System.out.println("Ran 1");
             CoreLabel previousWord = getPreviousWord(indexMotAmbiguee);
             if (previousWord == null) {
                 previousWord = getNextWord(indexMotAmbiguee);
@@ -454,7 +455,6 @@ public class Main {
             }
             lastLeftRightSynset = initLeftRight(indexMotAmbiguee, getFullIndex(previousWord));
         } else {
-            System.out.println("Ran 2");
             CoreLabel previousWord = getPreviousWord(indexMotAmbiguee);
             if (previousWord == null) {
                 previousWord = getNextWord(indexMotAmbiguee);
@@ -468,6 +468,7 @@ public class Main {
                 lastLeftRightSynset.synset = iw.getSenses()[0];
                 lastLeftRightSynset.id = 1;
                 lastLeftRightSynset.lastLemma = iw.getLemma();
+                lastLeftRightSynset.word = previousWord.word();
             }
         }
 
@@ -475,7 +476,6 @@ public class Main {
         Synset[] middleSynsets = middleIndexWord.getSenses();
 
         float currentDistance = 10, smallestDistance = 10;
-//
         for (int index = 0; index < middleSynsets.length; index++) {
             rita.wordnet.jwnl.wndata.IndexWord middleIndex = new rita.wordnet.jwnl.wndata.IndexWord(middleIndexWord.getLemma(),
                     rita.wordnet.jwnl.wndata.POS.NOUN,
@@ -485,7 +485,7 @@ public class Main {
                     new long[]{lastLeftRightSynset.synset.getOffset()});
             currentDistance = riwordnet.getWordDistance(middleIndex, lastWordIndex);
 
-            System.out.format("  DISTANCE(%15s Synset %d , %15s Synset %d) = %f\n", middleIndexWord.getLemma(), index + 1, lastLeftRightSynset.lastLemma, lastLeftRightSynset.id, currentDistance);
+            System.out.format("  DISTANCE(%15s Synset %d , %15s Synset %d) = %f\n", middleLabel.word(), index + 1, lastLeftRightSynset.word, lastLeftRightSynset.id, currentDistance);
 
 
             if (currentDistance < smallestDistance) {
@@ -496,7 +496,7 @@ public class Main {
                 resultat.lastLemma = middleIndex.getLemma();
             }
         }
-        System.out.format(" la petite distance est la DISTANCE(%20s Synset %d, %20s Synset %d) = %f\n", resultat.lastLemma, resultat.id, lastLeftRightSynset.lastLemma, lastLeftRightSynset.id, smallestDistance);
+        System.out.format(" la petite distance est la DISTANCE(%20s Synset %d, %20s Synset %d) = %f\n", resultat.word, resultat.id, lastLeftRightSynset.word, lastLeftRightSynset.id, smallestDistance);
 
         System.out.println("\n\t\t\tle synset retenu par algorithme  de Left to Right est : " + resultat.id);
         System.out.println("Gloss du synset: " + resultat.synset.getGloss());
@@ -537,7 +537,7 @@ public class Main {
         } else {
             if (doc.tokens().get(i).tag().contains("NN")) {
                 if (dico.lookupIndexWord(POS.NOUN, doc.tokens().get(i).lemma()) == null) {
-                    //System.out.println("Mot " + doc.tokens().get(i).word() + " trouvée mais n'a pas de synset recherche du prochain...");
+                    System.out.println("Mot " + doc.tokens().get(i).word() + " trouvée mais n'a pas de synset recherche du prochain...");
                     return getPreviousWord(i);
                 } else {
                     if (dico.lookupIndexWord(POS.NOUN, doc.tokens().get(i).lemma()).getSenseCount() == 0) {
@@ -568,7 +568,7 @@ public class Main {
         } else {
             if (doc.tokens().get(i).tag().contains("NN")) {
                 if (dico.lookupIndexWord(POS.NOUN, doc.tokens().get(i).lemma()) == null) {
-                    //System.out.println("Mot " + doc.tokens().get(i).word() + " trouvée mais n'a pas de synset recherche du prochain...");
+                    System.out.println("Mot " + doc.tokens().get(i).word() + " trouvée mais n'a pas de synset recherche du prochain...");
                     return getNextWord(i);
                 } else {
                     if (dico.lookupIndexWord(POS.NOUN, doc.tokens().get(i).lemma()).getSenseCount() == 0) {
